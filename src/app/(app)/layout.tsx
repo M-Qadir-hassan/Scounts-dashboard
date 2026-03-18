@@ -11,20 +11,18 @@ async function getSidebarData(role: string, userId: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } }
   );
+
   if (role === "admin") {
-    const [{ data: clients }, { data: accountants }] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, full_name, company_name, email, role")
-        .eq("role", "client"),
-      supabase
-        .from("profiles")
-        .select("id, full_name, company_name, email, role")
-        .eq("role", "accountant"),
+    const [{ data: clients, error: cErr }, { data: accountants, error: aErr }] = await Promise.all([
+      supabase.from("profiles").select("id, full_name, company_name, email, role").eq("role", "client"),
+      supabase.from("profiles").select("id, full_name, company_name, email, role").eq("role", "accountant"),
     ]);
+
+    console.log("clients:", clients, "error:", cErr);
+    console.log("accountants:", accountants, "error:", aErr);
+
     return { clients: clients ?? [], accountants: accountants ?? [] };
   }
-
   // Accountant: fetch only assigned clients
   const { data: assignments } = await supabase
     .from("assignments")
@@ -43,6 +41,7 @@ async function getSidebarData(role: string, userId: string) {
 
   return { clients: clients ?? [], accountants: [] };
 }
+
 
 export default async function AppLayout({
   children,
