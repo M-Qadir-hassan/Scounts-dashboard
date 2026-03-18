@@ -1,10 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-const HOME: Record<string, string> = {
-  admin:      "/admin",
-  accountant: "/accountant",
-};
+import { env } from "@/lib/env";
+import { HOME } from "@/lib/routes";
 
 const PUBLIC = new Set(["/login"]);
 
@@ -17,8 +14,8 @@ export async function proxy(req: NextRequest) {
   const res = NextResponse.next({ request: req });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll: () => req.cookies.getAll(),

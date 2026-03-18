@@ -1,4 +1,6 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import "server-only";
+import { type SupabaseClient } from "@supabase/supabase-js";
+import { adminDb } from "@/lib/supabase-admin";
 
 export type Role = "client" | "accountant";
 
@@ -27,11 +29,7 @@ export class UserManager {
   private db: SupabaseClient;
 
   private constructor() {
-    this.db = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    );
+    this.db = adminDb;
   }
 
   static getInstance(): UserManager {
@@ -82,7 +80,7 @@ export class UserManager {
     return this._create(p.email, p.password, "client", {
       company_name: p.companyName,
       sheet_id:     p.sheetId    ?? null,
-      sheet_range:  p.sheetRange ?? "Sheet1!B3:F2000",
+      sheet_range:  p.sheetRange ?? "expenses!B3:F1000",
     });
   }
 
@@ -124,7 +122,7 @@ export class UserManager {
   async updateSheet(id: string, sheetId: string, sheetRange?: string): Promise<UserResult> {
     const { error } = await this.db.from("profiles").update({
       sheet_id:    sheetId,
-      sheet_range: sheetRange ?? "Sheet1!B3:F2000",
+      sheet_range: sheetRange ?? "expenses!B3:F1000",
     }).eq("id", id);
     return { success: !error, error: error?.message };
   }

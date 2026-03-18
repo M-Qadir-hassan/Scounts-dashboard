@@ -16,8 +16,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       <FieldGroup>
         {/* Header */}
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-sm text-balance text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Login to your account</h1>
+          <p className="text-sm md:text-base text-balance text-muted-foreground">
             Enter your email below to login to your account
           </p>
         </div>
@@ -40,7 +40,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
+            <a href="#" className="ml-auto text-xs md:text-sm underline-offset-4 hover:underline">
               Forgot your password?
             </a>
           </div>
@@ -56,7 +56,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
 
         {/* Error */}
         {state?.error && (
-          <p className="text-sm font-medium text-destructive">{state.error}</p>
+          <p className="text-sm md:text-base font-medium text-destructive">{state.error}</p>
         )}
 
         {/* Submit */}

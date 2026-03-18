@@ -1,15 +1,18 @@
 import { userManager } from "@/lib/UserManager";
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { sameOrigin, getAuthenticatedUserFromRequest } from "@/lib/auth";
+import { logAuditAction } from "@/lib/audit";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => req.cookies.getAll(), setAll: () => {} } }
-  );
+  if (!checkRateLimit(req)) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Cookie-authenticated endpoint with side effects: require same-origin to reduce CSRF risk.
+  if (!sameOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const user = await getAuthenticatedUserFromRequest(req);
 
   if (user?.app_metadata?.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,7 +22,7 @@ export async function POST(req: NextRequest) {
   const { role, email, password, fullName, companyName, sheetId } = body;
 
   if (!email || !password || !role) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-  if (password.length < 6)         return NextResponse.json({ error: "Password < 6 chars" }, { status: 400 });
+  if (password.length < 10)        return NextResponse.json({ error: "Password too short" }, { status: 400 });
   if (role === "accountant" && !fullName)  return NextResponse.json({ error: "Name required" }, { status: 400 });
   if (role === "client" && !companyName)   return NextResponse.json({ error: "Company required" }, { status: 400 });
 
@@ -30,12 +33,11 @@ export async function POST(req: NextRequest) {
 
     if (!result.success) return NextResponse.json({ error: result.error }, { status: 400 });
 
+    logAuditAction(user.id, result.userId!, "USER_CREATE", { role, email });
+
     return NextResponse.json({ userId: result.userId, success: true }, { status: 201 });
-// AFTER
-} catch (err: unknown) {
-  console.error("[USER_CREATION_ERROR]:", err);
-  return NextResponse.json({ 
-    error: err instanceof Error ? err.message : "Internal server error"
-  }, { status: 500 });
-}
+  } catch (err: unknown) {
+    console.error("[USER_CREATION_ERROR]:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

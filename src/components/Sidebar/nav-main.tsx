@@ -10,11 +10,11 @@ import {
 import Link from "next/link";
 
 interface NavItem {
-  title:     string;
-  url:       string;
-  icon?:     LucideIcon;
-  isActive?: boolean;
-  items?:    { title: string; url: string }[];
+  title:  string;
+  url:    string;
+  icon?:  LucideIcon;
+  exact?: boolean;
+  items?: { title: string; url: string }[];
 }
 
 export function NavMain({ items, label = "Platform" }: { items: NavItem[]; label?: string }) {
@@ -25,10 +25,11 @@ export function NavMain({ items, label = "Platform" }: { items: NavItem[]; label
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const active  = pathname === item.url || pathname.startsWith(item.url + "/");
+          const active  = item.exact
+            ? pathname === item.url
+            : pathname === item.url || pathname.startsWith(item.url + "/");
           const hasSubs = !!item.items?.length;
 
-          // ── No sub-items → plain link ──────────────────────────────────────
           if (!hasSubs) {
             return (
               <SidebarMenuItem key={item.title}>
@@ -42,7 +43,6 @@ export function NavMain({ items, label = "Platform" }: { items: NavItem[]; label
             );
           }
 
-          // ── Has sub-items → collapsible ────────────────────────────────────
           return (
             <Collapsible key={item.title} asChild defaultOpen={active} className="group/collapsible">
               <SidebarMenuItem>

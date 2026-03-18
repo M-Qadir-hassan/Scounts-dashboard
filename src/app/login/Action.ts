@@ -3,11 +3,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-const HOME: Record<string, string> = {
-  admin:      "/admin",
-  accountant: "/accountant",
-};
+import { env } from "@/lib/env";
+import { HOME } from "@/lib/routes";
 
 export async function loginAction(
   _prev: { error: string } | null,
@@ -21,8 +18,8 @@ export async function loginAction(
   const cookieStore = await cookies();
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll: () => cookieStore.getAll(),

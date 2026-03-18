@@ -14,11 +14,11 @@ export function SectionHeader({ title, description, className }: SectionHeaderPr
 
       {/* Text */}
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-5xl text-primary font-light  tracking-wide leading-none ">
+        <h2 className="text-xl md:text-2xl lg:text-3xl text-primary font-light tracking-wide leading-none">
           {title}
         </h2>
         {description && (
-          <p className="text-sm text-muted-foreground font-light leading-none tracking-wide">
+          <p className="text-sm md:text-base text-muted-foreground font-light leading-none tracking-wide">
             {description}
           </p>
         )}
