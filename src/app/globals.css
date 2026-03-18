@@ -125,4 +125,10 @@
   html {
     @apply font-sans;
   }
+  @layer utilities {
+  [data-sidebar="menu-button"][data-active="true"] {
+    background-color: var(--sidebar-primary) !important;
+    color: var(--primary-foreground) !important;
+  }
+}
 }
